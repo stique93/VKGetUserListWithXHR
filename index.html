@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>VK API TEST</title>
+    <style>
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        a {
+            text-decoration: none;
+            color: black;
+            display: flex;
+            align-items: center;
+        }
+
+        h4 {
+            margin: 0;
+        }
+
+        img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <button id='load'>Показать друзей</button>
+    <ul></ul>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script>
+        $('#load').on('click', loadFriends);
+
+        function getUrl(method, params) {
+            if (!method) throw new Error('Вы не указали метод!');
+            params = params || {};
+            params['access_token'] = '308420075d71ebbdd53248b548bdd248dcf7682b33c9d6ea47f149626df8671b0868bed18b3ec73e3ffbe';
+            return 'https://api.vk.com/method/' + method + '?' + $.param(params) + '&v=5.52';
+        }
+
+        function sendRequest(method, params, func) {
+            $.ajax({
+                url: getUrl(method, params),
+                method: 'GET',
+                dataType: 'JSONP',
+                success: func
+            });
+        }
+
+        function loadFriends() {
+            sendRequest('friends.search', { count: 60, fields: 'photo_100,online' }, function (data) {
+                drawFriends(data.response.items);
+            });
+        }
+
+        function drawFriends(friends) {
+            var html = '';
+            for (var i = 0; i < friends.length; i++) {
+                var friend = friends[i];
+                var online = friend.online ? 'Online' : 'Offline';
+                html += '<li>' +
+                    '<a target="_blank" href="https://vk.com/id' + friend.id + '">'
+                    + '<img src="' + friend.photo_100 + '"/>'
+                    + '<div>'
+                    + '<h4>' + friend.first_name + ' ' + friend.last_name + '</h4>'
+                    + '<p>' + online + '</p>'
+                    + '<button>Написать</button>'
+                    + '</div>'
+                    + '</a>'
+                    + '</li>';
+            }
+            $('ul').html(html);
+        }
+
+
+    </script>
+</body>
+
+</html>
