@@ -6,36 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>VK API TEST</title>
-    <style>
-        ul {
-            list-style: none;
-        }
-
-        li {
-            margin-bottom: 15px;
-        }
-
-        a {
-            text-decoration: none;
-            color: black;
-            display: flex;
-            align-items: center;
-        }
-
-        h4 {
-            margin: 0;
-        }
-
-        img {
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            margin-right: 20px;
-        }
-        .sort-header{
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -47,13 +18,18 @@
         <option value='male'>М</option>
         <option value='female'>Ж</option>
     </select>
-    <button id='search' onclick="filterSex()">Поиск</button>
+    <select id='select-status'>
+        <option value='all'>Все</option>
+        <option value='online'>В сети</option>
+        <option value='offline'>Не в сети</option>
+    </select>
+    <button id='search' onclick="acceptFilter()">Поиск</button>
     <table id="example" class="display" style="width:100%">
         <ul></ul>
         <thead>
             <tr>
                 <th>Number</th>
-                <th>ID</th>
+                <th class="sort-header" onclick='sortByID()'>ID</th>
                 <th>Avatar</th>
                 <th class='sort-header' onclick='sortByFIO()'>FIO</th>
                 <th>Sex</th>
@@ -63,113 +39,7 @@
         <tbody></tbody>
     </table>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
-    <script>
-        $('#load').on('click', loadFriends);
-
-        var friendsList = null;
-        var sortFIOAB = false;
-
-        function filterSex() {
-            var sex = window.document.getElementById('select-sex').value;
-
-            var friendsListFiltered = friendsList.filter(function (item) {
-                if (sex === 'all') { return item }
-                return getSex(item.sex) === sex;
-            });
-            drawFriends(friendsListFiltered);
-        }
-        function sortByFIO() {
-            function compareAB(a, b) {
-                if (a.last_name > b.last_name) return 1;
-                if (a.last_name < b.last_name) return -1;
-            }
-            function compareBA(a, b) {
-                if (a.last_name < b.last_name) return 1;
-                if (a.last_name > b.last_name) return -1;
-            }
-
-            if (sortFIOAB) {
-                friendsList.sort(compareAB);
-            }
-            else {
-                friendsList.sort(compareBA);
-            }
-            sortFIOAB = !sortFIOAB;
-            drawFriends(friendsList);
-        }
-
-        function getUrl(method, params) {
-            if (!method) throw new Error('Вы не указали метод!');
-            params = params || {};
-            params['access_token'] = '0a93bfc22b3b6e8b585fc1a1136b21af54fef7beae06e2142f92b77b6348facd1e226fa9f9d4e3b2e8e8d';
-            return 'https://api.vk.com/method/' + method + '?' + $.param(params) + '&v=5.52';
-        }
-
-        function sendRequest(method, params, func) {
-            $.ajax({
-                url: getUrl(method, params),
-                method: 'GET',
-                dataType: 'JSONP',
-                success: func
-            });
-            console.log(getUrl(method, params));
-        }
-
-        function loadFriends() {
-            var search = window.document.getElementById('search').value;
-            sendRequest('friends.search', { count: 30, fields: 'photo_100,online,sex,bdate', q: search }, function (data) {
-                friendsList = data.response.items;
-                drawFriends(friendsList);
-            });
-        }
-        loadFriends();
-        function drawFriends(friends) {
-            //console.log(friends);
-            var html = '';
-            var htmltr = '';
-            for (var i = 0; i < friends.length; i++) {
-                var friend = friends[i];
-                var online = friend.online ? 'Online' : 'Offline';
-                var sex = getSex(friend.sex);
-                html += '<li>' +
-                    '<a target="_blank" href="https://vk.com/id' + friend.id + '">'
-                    + '<img src="' + friend.photo_100 + '"/>'
-                    + '<div>'
-                    + '<h4>' + friend.first_name + ' ' + friend.last_name + '</h4>'
-                    + '<p>' + online + ' ' + sex + '</p>'
-                    + '<button>Написать</button>'
-                    + '</div>'
-                    + '</a>'
-                    + '</li>';
-                htmltr += '<tr>'
-                    + '<a target="_blank" href="https://vk.com/id' + friend.id + '">'
-                    + '<td>' + i + '</td>'
-                    + '<td>' + friend.id + '</td>'
-                    + '<td>' + '<img src="' + friend.photo_100 + '"/>' + '</td>'
-                    + '<td>' + friend.first_name + ' ' + friend.last_name + '</td>'
-                    + '<td>' + sex + '</td>'
-                    + '<td>' + online + '</td>'
-                    + '</tr>';
-            }
-            //$('ul').html(html);
-            $('tbody').html(htmltr);
-        }
-
-        function getSex(sex) {
-            var putSex = '';
-            switch (sex) {
-                case 0: putSex = 'unknown';
-                    break;
-                case 1: putSex = 'female';
-                    break;
-                case 2: putSex = 'male';
-                    break;
-            }
-            return putSex;
-        }
-
-
-    </script>
+    <script type="text/javascript" src="script.js"></script>
 </body>
 
 </html>
